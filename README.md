@@ -1,4 +1,7 @@
-
+-- Verifica se o jogo está carregado
+if not game:IsLoaded() then
+    game.Loaded:Wait() -- Espera o jogo carregar
+end
 -- Carregar a Fluent UI e os addons
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
