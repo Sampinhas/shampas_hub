@@ -56,69 +56,36 @@ _G = {
 }
 
 -- Função para salvar dados em um arquivo JSON
-local function saveSettings()
+local function salvarDados(dados)
     local nomeConta = player.Name
     local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
-
-    -- Criando tabela com os valores das variáveis globais
-    local dados = {
-        EquiparEspadasAtivo = equiparEspadasAtivo,
-        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
-    }
-
-    -- Debug: Verifica o que está sendo salvo
-    print("🔹 Salvando dados:", dados)
-
-    local sucesso, resultado = pcall(function()
-        local jsonData = game:GetService("HttpService"):JSONEncode(dados)
-        writefile(caminho, jsonData)
-    end)
-
-    if sucesso then
-        print("✅ Dados salvos com sucesso para " .. nomeConta)
-    else
-        print("❌ Erro ao salvar dados: ", resultado)
-    end
+    
+    local jsonDados = game:GetService("HttpService"):JSONEncode(dados)
+    
+    writefile(caminho, jsonDados)
+    print("Dados salvos com sucesso em " .. caminho)
 end
 
--- Função para carregar configurações do arquivo JSON
-local function loadSettings()
-    local nomeConta = player.Name
+-- Função para carregar dados de um arquivo JSON
+local function carregarDados()
+    local nomeConta  = player.Name
     local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
-
+    
     if isfile(caminho) then
-        local sucesso, conteudo = pcall(function()
-            return readfile(caminho)
-        end)
-
-        if sucesso and conteudo and conteudo ~= "" then
-            local sucessoDecode, settings = pcall(function()
-                return game:GetService("HttpService"):JSONDecode(conteudo)
-            end)
-
-            if sucessoDecode and settings then
-                equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
-                _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
-                print("✅ Configurações carregadas para " .. nomeConta, settings)
-            else
-                print("❌ Erro ao decodificar configurações para " .. nomeConta .. " (JSON inválido)")
-            end
-        else
-            print("⚠️ Arquivo encontrado, mas está vazio ou corrompido.")
-        end
+        local jsonDados = readfile(caminho)
+        local dados = game:GetService("HttpService"):JSONDecode(jsonDados)
+        print("Dados carregados com sucesso de " .. caminho)
+        return dados
     else
-        print("⚠️ Nenhuma configuração salva encontrada para " .. nomeConta)
+        print("Nenhum dado salvo encontrado.")
+        return {}
     end
 end
 
--- Teste: Salvar e carregar configurações
-saveSettings()
-loadSettings()
-
-
-
--- Carregar configurações ao iniciar o script
-loadSettings()
+local dados = carregarDados()  -- Chama a função para carregar os dados
+    
+equiparEspadasAtivo = dados.EquiparEspadasAtivo or false  -- Define valores padrões, caso os dados estejam vazios
+_G.AutoBuyLegendarySword = dados.AutoBuyLegendarySword or false
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
@@ -342,7 +309,7 @@ Tabs.principal:AddToggle("Equipar Espadas", {
         else
             print("Equipar espadas desativado!")
         end
-        saveSettings() -- Salva as configurações ao alterar o toggle
+        salvarDados({EquiparEspadasAtivo = equiparEspadasAtivo})
     end
 })
 
@@ -358,7 +325,7 @@ Tabs.principal:AddToggle("Auto Buy Legendary Sword", {
         else
             print("Auto Buy Legendary Sword desativado!")
         end
-        saveSettings() -- Salva as configurações ao alterar o toggle
+        salvarDados({AutoBuyLegendarySword = _G.AutoBuyLegendarySword})
     end
 })
 
