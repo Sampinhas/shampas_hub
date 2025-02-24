@@ -46,17 +46,19 @@ local function saveSettings()
     print("Configurações salvas para " .. player.Name)
 end
 
--- Função para carregar as configurações
 local function loadSettings()
-    -- Carrega as configurações com o nick do jogador
-    local success, settings = SaveManager:Load(player.Name .. "_config")
-    print(settings)
+    local success, settings = pcall(function()
+        return SaveManager:Load(player.Name .. "_config")
+    end)
+
     if success and settings then
-        equiparEspadasAtivo = settings.EquiparEspadasAtivo
-        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword
+        equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
+        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
         print("Configurações carregadas para " .. player.Name)
     else
-        print("Nenhuma configuração salva encontrada para " .. player.Name)
+        print("Erro ao carregar configurações para " .. player.Name .. ". Usando padrões.")
+        equiparEspadasAtivo = false
+        _G.AutoBuyLegendarySword = false
     end
 end
 
