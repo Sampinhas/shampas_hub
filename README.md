@@ -309,7 +309,7 @@ Tabs.principal:AddToggle("Equipar Espadas", {
         else
             print("Equipar espadas desativado!")
         end
-        salvarDados({EquiparEspadasAtivo = equiparEspadasAtivo})
+        salvarDados(dados)
     end
 })
 
@@ -325,7 +325,11 @@ Tabs.principal:AddToggle("Auto Buy Legendary Sword", {
         else
             print("Auto Buy Legendary Sword desativado!")
         end
-        salvarDados({AutoBuyLegendarySword = _G.AutoBuyLegendarySword})
+        local dados = {
+            EquiparEspadasAtivo = equiparEspadasAtivo,
+            AutoBuyLegendarySword = _G.AutoBuyLegendarySword
+        }
+        salvarDados(dados)
     end
 })
 
