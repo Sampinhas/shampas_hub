@@ -237,6 +237,26 @@ function AutoHaki()
     end
 end
 
+
+-- Função para solicitar a espada ao NPC/jogo
+local function claimSword(swordName)
+    local remote = replicatedStorage:FindFirstChild("Remotes"):FindFirstChild("CommF_")
+    if remote then
+        print("Tentando pegar a espada " .. swordName .. "...")
+        local success, response = pcall(function()
+            return remote:InvokeServer("LoadItem", swordName)
+        end)
+
+        if success then
+            print("Espada " .. swordName .. " retirada do sistema!")
+        else
+            print("Falha ao pegar " .. swordName .. ":", response)
+        end
+    else
+        print("Não foi possível encontrar a função de retirada!")
+    end
+end
+
 -- Função para equipar a espada
 local function equipSword(swordName)
     local character = player.Character or player.CharacterAdded:Wait()
@@ -252,6 +272,33 @@ local function equipSword(swordName)
     else
         print(swordName .. " não encontrada no inventário!")
     end
+end
+
+-- Função para verificar a maestria
+local function verificarMaestria()
+    -- Acessando a GUI do jogador e a parte que pode conter as informações de maestria
+    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    local allTextLabels = playerGui:GetDescendants()
+
+    -- Variáveis para armazenar a palavra "Mastery" ou "Maestria"
+    local palavra1 = "Mastery"
+    local palavra2 = "Maestria"
+
+    -- Percorrer todos os TextLabels na GUI para procurar pelas palavras
+    for _, object in pairs(allTextLabels) do
+        if object:IsA("TextLabel") then
+            -- Verificar se o texto contém "Mastery" ou "Maestria"
+            if string.find(object.Text, palavra1) or string.find(object.Text, palavra2) then
+                -- Extrair o número (maestria) ao lado do texto
+                local numeroMaestria = object.Text:match("%d+")
+                if numeroMaestria then
+                    return tonumber(numeroMaestria)
+                end
+            end
+        end
+    end
+
+    return 0
 end
 
 -- Função principal para equipar as espadas e verificar a maestria
