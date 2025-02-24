@@ -300,7 +300,7 @@ local Tabs = {
 Tabs.principal:AddToggle("Equipar Espadas", {
     Title = "Equipar Espadas",
     Description = "Liga/desliga o equipar espadas",
-    Default = false,
+    Default = equiparEspadasAtivo,
     Callback = function(Value)
         equiparEspadasAtivo = Value
         if Value then
@@ -316,7 +316,7 @@ Tabs.principal:AddToggle("Equipar Espadas", {
 Tabs.principal:AddToggle("Auto Buy Legendary Sword", {
     Title = "Auto Buy Legendary Sword",
     Description = "Liga/desliga a compra automática de espadas lendárias",
-    Default = false,
+    Default = _G.AutoBuyLegendarySword,
     Callback = function(Value)
         _G.AutoBuyLegendarySword = Value
         if Value then
