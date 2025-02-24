@@ -9,6 +9,47 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 local P = game:GetService("Players");
 local selff = P.LocalPlayer;
 local PSG = selff:WaitForChild("PlayerGui");
+Fluent:Notify({
+    Title = "Shampas HUB v1.0",
+    Content = "Carregando em alguns segundos...",
+    Duration = 8
+})
+
+-- Serviços necessários
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+-- Função para escolher o lado automaticamente
+local function chooseTeam(team)
+    if team == "Pirates" or team == "Marines" then
+        ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", team) -- Escolhe o time
+        print("Você escolheu automaticamente o lado dos " .. team .. "!")
+    else
+        warn("Time inválido! Escolha 'Pirates' ou 'Marines'.")
+    end
+end
+
+wait(1)
+
+-- Escolhe automaticamente os Piratas
+chooseTeam("Pirates")
+
+wait(3)
+
+-- Serviços necessários
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+-- RemoteEvent usado para escolher o lado
+local chooseTeamEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_"):WaitForChild("ChooseTeam")
+
+-- Função para escolher o lado automaticamente
+local function choosePirates()
+    chooseTeamEvent:InvokeServer("Pirates") -- Escolhe automaticamente os Piratas
+    print("Você escolheu automaticamente o lado dos Piratas!")
+end
 
 -- Função para salvar as configurações
 local function saveSettings()
@@ -281,93 +322,27 @@ print("Criando abas...")
 local Tabs = {
     principal = Window:AddTab({ Title = "Principal", Icon = "" }),
     Teleporte = Window:AddTab({ Title = "Teleporte", Icon = "" }),
+    Lado = Window:AddTab({ Title = "Lado", Icon = "" }),
     Outros = Window:AddTab({ Title = "Outros", Icon = "" })
 }
 print("Abas criadas!")
 
--- Estrutura de configurações
-local Configs = {
-    Farming = {
-        Sea3 = {
-            AutoFarmBone = false
-        }
-    },
-    Teleport = {
-        TP_Bypass = false
-    },
-    Settings = {
-        AutoFarm = {
-            TP_Speed = 4,
-            PosX = 0,
-            PosY = 0,
-            PosZ = 0
-        },
-        AutoChest = {
-            TP_Speed = 4
-        }
-    }
-}
--- Alteração de variáveis, como por exemplo o TP_Speed
-Configs.Settings.AutoFarm.TP_Speed = 6 -- Altere para o valor desejado
-Configs.Farming.Sea3.AutoFarmBone = true -- Ativar AutoFarmBone diretamente
-Configs.Teleport.TP_Bypass = false -- Defina conforme a necessidade
-Configs.Settings.AutoFarm.PosX = 10 -- Ajuste a posição em X
-Configs.Settings.AutoFarm.PosY = 5  -- Ajuste a posição em Y
-Configs.Settings.AutoFarm.PosZ = 0  -- Ajuste a posição em Z
-
--- Função do AutoFarmBone sem salvar configurações
-local function AutoFarmBone()
-    if Configs.Farming.Sea3.AutoFarmBone then
-        pcall(function()
-            -- Verifica se a quest não é a "Demonic Soul"
-            local QuestTitle = PSG.Main.Quest.Container.QuestTitle.Title.Text
-            if not strfind(QuestTitle, "Demonic Soul") then
-                CommF:InvokeServer("AbandonQuest")
-            end
-
-            -- Se a quest não estiver visível, realiza o teletransporte e começa a quest
-            if not PSG.Main.Quest.Visible then
-                if Configs.Teleport.TP_Bypass and dist(Vec3(-9516.99316, 172.017181, 6078.46533)) >= 3000 then
-                    TpBypass(CF(-9516.99316, 172.017181, 6078.46533))
-                    twait(0.7)
-                end
-                Tp(CF(-9516.99316, 172.017181, 6078.46533), Configs.Settings.AutoChest.TP_Speed or 4)
-                if dist(Vec3(-9516.99316, 172.017181, 6078.46533)) <= 5 then
-                    CommF:InvokeServer("StartQuest", "HauntedQuest2", 1)
-                end
-            else
-                -- Se houver inimigos para atacar
-                if FindFirstChild(Enemy, "Reborn Skeleton") or FindFirstChild(Enemy, "Living Zombie") or FindFirstChild(Enemy, "Demonic Soul") or FindFirstChild(Enemy, "Posessed Mummy") then
-                    for i, v in ipairs(Enem) do
-                        if FindFirstChild(v, "HumanoidRootPart") and FindFirstChild(v, "Humanoid") and v.Humanoid.Health > 0 then
-                            if v.Name == "Reborn Skeleton" or v.Name == "Living Zombie" or v.Name == "Demonic Soul" or v.Name == "Posessed Mummy" then
-                                if strfind(PSG.Main.Quest.Container.QuestTitle.Title.Text, "Demonic Soul") then
-                                    TargetMobName = v.Name
-                                    repeat
-                                        twait()
-                                        Tp(v.HumanoidRootPart.CFrame * CF(Configs.Settings.AutoFarm.PosX, Configs.Settings.AutoFarm.PosY, Configs.Settings.AutoFarm.PosZ), Configs.Settings.AutoFarm.TP_Speed)
-                                        SetHum(v)
-                                        Hitc()
-                                    until not Configs.Farming.Sea3.AutoFarmBone or v.Humanoid.Health <= 0 or not v.Parent or not PSG.Main.Quest.Visible
-                                end
-                            end
-                        end
-                    end
-                else
-                    -- Caso não tenha inimigos, realiza um novo teletransporte
-                    RepFindBoneMobs = FindFirstChild(R, "Reborn Skeleton") or FindFirstChild(R, "Living Zombie") or FindFirstChild(R, "Demonic Soul") or FindFirstChild(R, "Posessed Mummy")
-                    if RepFindBoneMobs then
-                        if Configs.Teleport.TP_Bypass and dist(Vec3(-9516.99316, 172.017181, 6078.46533)) >= 3000 then
-                            TpBypass(CF(-9516.99316, 172.017181, 6078.46533))
-                            twait(0.7)
-                        end
-                        Tp(GetPivot(RepFindBoneMobs) * CF(35, 35, 0), Configs.Settings.AutoFarm.TP_Speed)
-                    end
-                end
-            end
-        end)
+-- Adiciona botões para escolher o lado
+Tabs.lado:AddButton({
+    Title = "Escolher Marines",
+    Description = "Clique para se juntar aos Marines",
+    Callback = function()
+        chooseTeam("Marines")
     end
-end
+})
+
+Tabs.lado:AddButton({
+    Title = "Escolher Piratas",
+    Description = "Clique para se juntar aos Piratas",
+    Callback = function()
+        chooseTeam("Pirates")
+    end
+})
 
 -- Função de Toggle sem salvar configurações
 Tabs.principal:AddToggle("Auto Farm Bone", {
@@ -474,7 +449,7 @@ Window:SelectTab(1)
 
 -- Notificação de carregamento
 Fluent:Notify({
-    Title = "Fluent",
+    Title = "Shampas HUB v1.0",
     Content = "A interface foi carregada com sucesso!",
     Duration = 8
 })
