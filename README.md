@@ -35,21 +35,7 @@ wait(1)
 -- Escolhe automaticamente os Piratas
 chooseTeam("Pirates")
 
-wait(3)
-
--- Serviços necessários
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local player = Players.LocalPlayer
-
--- RemoteEvent usado para escolher o lado
-local chooseTeamEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_"):WaitForChild("ChooseTeam")
-
--- Função para escolher o lado automaticamente
-local function choosePirates()
-    chooseTeamEvent:InvokeServer("Pirates") -- Escolhe automaticamente os Piratas
-    print("Você escolheu automaticamente o lado dos Piratas!")
-end
+wait(7)
 
 -- Função para salvar as configurações
 local function saveSettings()
