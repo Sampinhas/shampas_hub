@@ -1,20 +1,25 @@
 -- Verifica se o jogo está carregado
 if not game:IsLoaded() then
-    game.Loaded:Wait()
+    game.Loaded:Wait() -- Espera o jogo carregar
 end
-
 -- Carregar a Fluent UI e os addons
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+local P = game:GetService("Players");
+local selff = P.LocalPlayer;
+local PSG = selff:WaitForChild("PlayerGui");
+Fluent:Notify({
+    Title = "Shampas HUB v1.0",
+    Content = "Carregando em alguns segundos...",
+    Duration = 8
+})
+
 -- Serviços necessários
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
-
--- Definir a pasta de configuração para ShampasHub
-SaveManager:SetFolder("ShampasHub")
 
 -- Função para escolher o lado automaticamente
 local function chooseTeam(team)
@@ -26,38 +31,13 @@ local function chooseTeam(team)
     end
 end
 
+wait(1)
+
 -- Escolhe automaticamente os Piratas
 chooseTeam("Pirates")
 
--- Variáveis globais
-local equiparEspadasAtivo = false
-local _G = {
-    AutoBuyLegendarySword = false
-}
+wait(7)
 
--- Função para salvar as configurações
-local function saveSettings()
-    local settings = {
-        EquiparEspadasAtivo = equiparEspadasAtivo,
-        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
-    }
-    -- Salva as configurações com o nick do jogador
-    SaveManager:Save(player.Name .. "_config", settings)
-    print("Configurações salvas para " .. player.Name)
-end
-
--- Função para carregar as configurações
-local function loadSettings()
-    -- Carrega as configurações com o nick do jogador
-    local success, settings = SaveManager:Load(player.Name .. "_config")
-    if success and settings then
-        equiparEspadasAtivo = settings.EquiparEspadasAtivo
-        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword
-        print("Configurações carregadas para " .. player.Name)
-    else
-        print("Nenhuma configuração salva encontrada para " .. player.Name)
-    end
-end
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
@@ -65,14 +45,15 @@ local Window = Fluent:CreateWindow({
     SubTitle = "feito por shampas 😍",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
     Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
 
 -- Variáveis globais
 local World1, World2, World3
 local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
+local equiparEspadasAtivo = false
 
 -- Verifica o mundo atual
 if game.PlaceId == 2753915549 then
@@ -209,6 +190,30 @@ function AutoHaki()
     end
 end
 
+
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local equiparEspadasAtivo = false
+
+-- Função para solicitar a espada ao NPC/jogo
+local function claimSword(swordName)
+    local remote = replicatedStorage:FindFirstChild("Remotes"):FindFirstChild("CommF_")
+    if remote then
+        print("Tentando pegar a espada " .. swordName .. "...")
+        local success, response = pcall(function()
+            return remote:InvokeServer("LoadItem", swordName)
+        end)
+
+        if success then
+            print("Espada " .. swordName .. " retirada do sistema!")
+        else
+            print("Falha ao pegar " .. swordName .. ":", response)
+        end
+    else
+        print("Não foi possível encontrar a função de retirada!")
+    end
+end
+
 -- Função para equipar a espada
 local function equipSword(swordName)
     local character = player.Character or player.CharacterAdded:Wait()
@@ -224,6 +229,24 @@ local function equipSword(swordName)
     else
         print(swordName .. " não encontrada no inventário!")
     end
+end
+
+-- Função para verificar a maestria
+local function verificarMaestria()
+    local playerGui = player:WaitForChild("PlayerGui")
+    local allTextLabels = playerGui:GetDescendants()
+
+    for _, object in pairs(allTextLabels) do
+        if object:IsA("TextLabel") then
+            if string.find(object.Text, "Mastery") or string.find(object.Text, "Maestria") then
+                local numeroMaestria = object.Text:match("%d+")
+                if numeroMaestria then
+                    return tonumber(numeroMaestria)
+                end
+            end
+        end
+    end
+    return 0
 end
 
 -- Função principal para equipar as espadas e verificar a maestria
@@ -261,12 +284,53 @@ local function equiparEspadas()
     end
 end
 
--- Criar abas
+print("Criando abas...")
 local Tabs = {
     principal = Window:AddTab({ Title = "Principal", Icon = "" }),
     Teleporte = Window:AddTab({ Title = "Teleporte", Icon = "" }),
     Outros = Window:AddTab({ Title = "Outros", Icon = "" })
 }
+print("Abas criadas!")
+
+-- Função para salvar as configurações
+local function saveSettings()
+    local settings = {
+        EquiparEspadasAtivo = equiparEspadasAtivo,
+        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
+    }
+    -- Salva as configurações com o nick do jogador
+    SaveManager:Save(player.Name .. "_config", settings)
+    print("Configurações salvas para " .. player.Name)
+end
+
+-- Função para carregar as configurações
+local function loadSettings()
+    -- Carrega as configurações com o nick do jogador
+    local success, settings = SaveManager:Load(player.Name .. "_config")
+    if success and settings then
+        equiparEspadasAtivo = settings.EquiparEspadasAtivo
+        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword
+        print("Configurações carregadas para " .. player.Name)
+    else
+        print("Nenhuma configuração salva encontrada para " .. player.Name)
+    end
+end
+
+-- Função de Toggle sem salvar configurações
+Tabs.principal:AddToggle("Auto Farm Bone", {
+    Title = "Auto Farm Bone",
+    Description = "Liga/desliga o AutoFarm de ossos no Sea 3",
+    Default = false, -- Inicializa sem depender de um valor carregado
+    Callback = function(Value)
+        Configs.Farming.Sea3.AutoFarmBone = Value  -- A variável é alterada diretamente
+        if Value then
+            print("AutoFarm Bone ativado!")
+            AutoFarmBone()  -- Inicia o loop de AutoFarm
+        else
+            print("AutoFarm Bone desativado!")
+        end
+    end
+})
 
 -- Função de Toggle com salvamento automático
 Tabs.principal:AddToggle("Equipar Espadas", {
@@ -298,6 +362,47 @@ Tabs.principal:AddToggle("Auto Buy Legendary Sword", {
             print("Auto Buy Legendary Sword desativado!")
         end
         saveSettings() -- Salva as configurações ao alterar o toggle
+    end
+})
+
+-- Outros botões e funções
+Tabs.Teleporte:AddButton({
+    Title = "Teleportar para Sea 1",
+    Description = "Clique para teleportar para o Sea 1",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
+    end
+})
+
+Tabs.Teleporte:AddButton({
+    Title = "Teleportar para Sea 2",
+    Description = "Clique para teleportar para o Sea 2",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa")
+    end
+})
+
+Tabs.Teleporte:AddButton({
+    Title = "Teleportar para Sea 3",
+    Description = "Clique para teleportar para o Sea 3",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou")
+    end
+})
+
+Tabs.Teleporte:AddButton({
+    Title = "Hop para outro Server",
+    Description = "Clique para trocar de server",
+    Callback = function()
+        Hop()
+    end
+})
+
+Tabs.Outros:AddButton({
+    Title = "Verificar Quest",
+    Description = "Clique para verificar a quest atual",
+    Callback = function()
+        CheckQuest()
     end
 })
 
