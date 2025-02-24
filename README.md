@@ -10,6 +10,54 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 local P = game:GetService("Players");
 local selff = P.LocalPlayer;
 local PSG = selff:WaitForChild("PlayerGui");
+
+-- Serviços necessários
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+-- Variáveis globais
+-- Obtém o mundo atual do jogo
+local currentSea = 1 -- Definição padrão para evitar erros
+
+if game.PlaceId == 2753915549 then
+    currentSea = 1  -- First Sea
+elseif game.PlaceId == 4442272183 then
+    currentSea = 2  -- Second Sea
+elseif game.PlaceId == 7449423635 then
+    currentSea = 3  -- Third Sea
+else
+    LocalPlayer:Kick("Jogo não suportado. Por favor, aguarde...")
+    return
+end
+
+-- Verifica em qual Sea a conta do jogador deve estar
+local function getAccountSea()
+    -- Verifica se o jogador pode ir para o Second Sea
+    local canGoToSecondSea = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa") == 1
+
+    -- Verifica se o jogador pode ir para o Third Sea
+    local canGoToThirdSea = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou") == 2
+
+    if canGoToThirdSea then
+        return 3
+    elseif canGoToSecondSea then
+        return 2
+    else
+        return 1
+    end
+end
+
+-- Obtém o Sea da conta
+local accountSea = getAccountSea()
+
+-- Se o jogador não estiver no Sea correto, ele é expulso
+if currentSea ~= accountSea then
+    LocalPlayer:Kick("Você está no Sea errado! A conta pertence ao Sea " .. accountSea .. ".")
+    return
+end
+
+
 Fluent:Notify({
     Title = "Shampas HUB v1.0",
     Content = "Carregando em alguns segundos...",
@@ -21,11 +69,6 @@ local equiparEspadasAtivo = false
 local _G = {
     AutoBuyLegendarySword = false
 }
-
--- Serviços necessários
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local player = Players.LocalPlayer
 
 -- Função para escolher o lado automaticamente
 local function chooseTeam(team)
@@ -55,23 +98,6 @@ local Window = Fluent:CreateWindow({
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
-
--- Variáveis globais
-local World1, World2, World3
-local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
-local equiparEspadasAtivo = false
-
--- Verifica o mundo atual
-if game.PlaceId == 2753915549 then
-    World1 = true
-elseif game.PlaceId == 4442272183 then
-    World2 = true
-elseif game.PlaceId == 7449423635 then
-    World3 = true
-else
-    game:GetService("Players").LocalPlayer:Kick("Jogo não suportado. Por favor, aguarde...")
-end
-
 -- Função Hop
 function Hop()
     local PlaceID = game.PlaceId
@@ -298,29 +324,53 @@ local Tabs = {
 }
 print("Abas criadas!")
 
-local function saveSettings()
-    local settings = {
-        EquiparEspadasAtivo = equiparEspadasAtivo,
-        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
-    }
-    print("Salvando configurações:", settings) -- Debug
-    SaveManager:Save(player.Name .. "_config", settings)
-    print("Configurações salvas para " .. player.Name)
-end
-
-
-local function loadSettings()
-    local success, settings = SaveManager:Load(player.Name .. "_config")
-    print("Tentando carregar configurações:", success, settings) -- Debug
+-- Função para salvar dados em um arquivo JSON
+local function salvarDados(dados)
+    local nomeConta = player.Name
+    local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
     
-    if success and settings then
-        equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
-        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
-        print("Configurações carregadas para " .. player.Name, settings)
+    local sucesso, resultado = pcall(function()
+        local jsonData = game:GetService("HttpService"):JSONEncode(dados)
+        writefile(caminho, jsonData)
+    end)
+    
+    if sucesso then
+        print("Dados salvos com sucesso para " .. nomeConta)
     else
-        print("Nenhuma configuração salva encontrada para " .. player.Name)
+        print("Erro ao salvar dados: ", resultado)
     end
 end
+
+-- Função para carregar configurações do arquivo JSON
+local function loadSettings()
+    local nomeConta = player.Name
+    local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
+    
+    if isfile(caminho) then -- Verifica se o arquivo existe
+        local sucesso, conteudo = pcall(function()
+            return readfile(caminho)
+        end)
+        
+        if sucesso then
+            local sucessoDecode, settings = pcall(function()
+                return game:GetService("HttpService"):JSONDecode(conteudo)
+            end)
+            
+            if sucessoDecode and settings then
+                equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
+                _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
+                print("Configurações carregadas para " .. nomeConta, settings)
+            else
+                print("Erro ao decodificar configurações para " .. nomeConta)
+            end
+        else
+            print("Erro ao ler arquivo de configurações para " .. nomeConta)
+        end
+    else
+        print("Nenhuma configuração salva encontrada para " .. nomeConta)
+    end
+end
+
 
 -- Carregar configurações ao iniciar o script
 loadSettings()
