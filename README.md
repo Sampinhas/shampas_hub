@@ -16,6 +16,12 @@ Fluent:Notify({
     Duration = 8
 })
 
+-- Variáveis globais
+local equiparEspadasAtivo = false
+local _G = {
+    AutoBuyLegendarySword = false
+}
+
 -- Serviços necessários
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
