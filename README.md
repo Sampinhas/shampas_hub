@@ -298,29 +298,30 @@ local Tabs = {
 }
 print("Abas criadas!")
 
--- Função para salvar as configurações
 local function saveSettings()
     local settings = {
         EquiparEspadasAtivo = equiparEspadasAtivo,
         AutoBuyLegendarySword = _G.AutoBuyLegendarySword
     }
-    -- Salva as configurações com o nick do jogador
+    print("Salvando configurações:", settings) -- Debug
     SaveManager:Save(player.Name .. "_config", settings)
     print("Configurações salvas para " .. player.Name)
 end
 
--- Função para carregar as configurações
+
 local function loadSettings()
-    -- Carrega as configurações com o nick do jogador
     local success, settings = SaveManager:Load(player.Name .. "_config")
+    print("Tentando carregar configurações:", success, settings) -- Debug
+    
     if success and settings then
-        equiparEspadasAtivo = settings.EquiparEspadasAtivo
-        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword
-        print("Configurações carregadas para " .. player.Name)
+        equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
+        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
+        print("Configurações carregadas para " .. player.Name, settings)
     else
         print("Nenhuma configuração salva encontrada para " .. player.Name)
     end
 end
+
 
 -- Função de Toggle sem salvar configurações
 Tabs.principal:AddToggle("Auto Farm Bone", {
