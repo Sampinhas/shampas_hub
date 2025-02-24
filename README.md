@@ -308,27 +308,9 @@ print("Criando abas...")
 local Tabs = {
     principal = Window:AddTab({ Title = "Principal", Icon = "" }),
     Teleporte = Window:AddTab({ Title = "Teleporte", Icon = "" }),
-    Lado = Window:AddTab({ Title = "Lado", Icon = "" }),
     Outros = Window:AddTab({ Title = "Outros", Icon = "" })
 }
 print("Abas criadas!")
-
--- Adiciona botões para escolher o lado
-Tabs.lado:AddButton({
-    Title = "Escolher Marines",
-    Description = "Clique para se juntar aos Marines",
-    Callback = function()
-        chooseTeam("Marines")
-    end
-})
-
-Tabs.lado:AddButton({
-    Title = "Escolher Piratas",
-    Description = "Clique para se juntar aos Piratas",
-    Callback = function()
-        chooseTeam("Pirates")
-    end
-})
 
 -- Função de Toggle sem salvar configurações
 Tabs.principal:AddToggle("Auto Farm Bone", {
