@@ -51,24 +51,33 @@ chooseTeam("Pirates")
 
 -- Variáveis globais
 local equiparEspadasAtivo = false
-local _G = {
+_G = {
     AutoBuyLegendarySword = false
 }
 
 -- Função para salvar dados em um arquivo JSON
-local function saveSettings(dados)
+local function saveSettings()
     local nomeConta = player.Name
     local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
-    
+
+    -- Criando tabela com os valores das variáveis globais
+    local dados = {
+        EquiparEspadasAtivo = equiparEspadasAtivo,
+        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
+    }
+
+    -- Debug: Verifica o que está sendo salvo
+    print("🔹 Salvando dados:", dados)
+
     local sucesso, resultado = pcall(function()
         local jsonData = game:GetService("HttpService"):JSONEncode(dados)
         writefile(caminho, jsonData)
     end)
-    
+
     if sucesso then
-        print("Dados salvos com sucesso para " .. nomeConta)
+        print("✅ Dados salvos com sucesso para " .. nomeConta)
     else
-        print("Erro ao salvar dados: ", resultado)
+        print("❌ Erro ao salvar dados: ", resultado)
     end
 end
 
@@ -76,31 +85,37 @@ end
 local function loadSettings()
     local nomeConta = player.Name
     local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
-    
-    if isfile(caminho) then -- Verifica se o arquivo existe
+
+    if isfile(caminho) then
         local sucesso, conteudo = pcall(function()
             return readfile(caminho)
         end)
-        
-        if sucesso then
+
+        if sucesso and conteudo and conteudo ~= "" then
             local sucessoDecode, settings = pcall(function()
                 return game:GetService("HttpService"):JSONDecode(conteudo)
             end)
-            
+
             if sucessoDecode and settings then
                 equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
                 _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
-                print("Configurações carregadas para " .. nomeConta, settings)
+                print("✅ Configurações carregadas para " .. nomeConta, settings)
             else
-                print("Erro ao decodificar configurações para " .. nomeConta)
+                print("❌ Erro ao decodificar configurações para " .. nomeConta .. " (JSON inválido)")
             end
         else
-            print("Erro ao ler arquivo de configurações para " .. nomeConta)
+            print("⚠️ Arquivo encontrado, mas está vazio ou corrompido.")
         end
     else
-        print("Nenhuma configuração salva encontrada para " .. nomeConta)
+        print("⚠️ Nenhuma configuração salva encontrada para " .. nomeConta)
     end
 end
+
+-- Teste: Salvar e carregar configurações
+saveSettings()
+loadSettings()
+
+
 
 -- Carregar configurações ao iniciar o script
 loadSettings()
