@@ -283,7 +283,7 @@ local Tabs = {
 print("Abas criadas!")
 
 -- Função para salvar dados em um arquivo JSON
-local function salvarDados(dados)
+local function saveSettings(dados)
     local nomeConta = player.Name
     local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
     
