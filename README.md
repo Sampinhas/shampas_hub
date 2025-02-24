@@ -1,32 +1,20 @@
 -- Verifica se o jogo está carregado
 if not game:IsLoaded() then
-    game.Loaded:Wait() -- Espera o jogo carregar
+    game.Loaded:Wait()
 end
+
 -- Carregar a Fluent UI e os addons
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-
-local P = game:GetService("Players");
-local selff = P.LocalPlayer;
-local PSG = selff:WaitForChild("PlayerGui");
 
 -- Serviços necessários
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
-Fluent:Notify({
-    Title = "Shampas HUB v1.0",
-    Content = "Carregando em alguns segundos...",
-    Duration = 8
-})
-
--- Variáveis globais
-local equiparEspadasAtivo = false
-local _G = {
-    AutoBuyLegendarySword = false
-}
+-- Definir a pasta de configuração para ShampasHub
+SaveManager:SetFolder("ShampasHub")
 
 -- Função para escolher o lado automaticamente
 local function chooseTeam(team)
@@ -38,13 +26,42 @@ local function chooseTeam(team)
     end
 end
 
-wait(1)
-
 -- Escolhe automaticamente os Piratas
 chooseTeam("Pirates")
 
-wait(7)
+-- Variáveis globais
+local equiparEspadasAtivo = false
+local _G = {
+    AutoBuyLegendarySword = false
+}
 
+-- Função para salvar as configurações
+local function saveSettings()
+    local settings = {
+        EquiparEspadasAtivo = equiparEspadasAtivo,
+        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
+    }
+    -- Salva as configurações com o nick do jogador
+    SaveManager:Save(player.Name .. "_config", settings)
+    print("Configurações salvas para " .. player.Name)
+end
+
+-- Função para carregar as configurações
+local function loadSettings()
+    -- Carrega as configurações com o nick do jogador
+    local success, settings = SaveManager:Load(player.Name .. "_config")
+    print(settings)
+    if success and settings then
+        equiparEspadasAtivo = settings.EquiparEspadasAtivo
+        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword
+        print("Configurações carregadas para " .. player.Name)
+    else
+        print("Nenhuma configuração salva encontrada para " .. player.Name)
+    end
+end
+
+-- Carregar configurações ao iniciar o script
+loadSettings()
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
@@ -52,10 +69,26 @@ local Window = Fluent:CreateWindow({
     SubTitle = "feito por shampas 😍",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
-    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Acrylic = true,
     Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+    MinimizeKey = Enum.KeyCode.LeftControl
 })
+
+-- Variáveis globais
+local World1, World2, World3
+local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
+
+-- Verifica o mundo atual
+if game.PlaceId == 2753915549 then
+    World1 = true
+elseif game.PlaceId == 4442272183 then
+    World2 = true
+elseif game.PlaceId == 7449423635 then
+    World3 = true
+else
+    game:GetService("Players").LocalPlayer:Kick("Jogo não suportado. Por favor, aguarde...")
+end
+
 -- Função Hop
 function Hop()
     local PlaceID = game.PlaceId
@@ -180,30 +213,6 @@ function AutoHaki()
     end
 end
 
-
-local player = game.Players.LocalPlayer
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local equiparEspadasAtivo = false
-
--- Função para solicitar a espada ao NPC/jogo
-local function claimSword(swordName)
-    local remote = replicatedStorage:FindFirstChild("Remotes"):FindFirstChild("CommF_")
-    if remote then
-        print("Tentando pegar a espada " .. swordName .. "...")
-        local success, response = pcall(function()
-            return remote:InvokeServer("LoadItem", swordName)
-        end)
-
-        if success then
-            print("Espada " .. swordName .. " retirada do sistema!")
-        else
-            print("Falha ao pegar " .. swordName .. ":", response)
-        end
-    else
-        print("Não foi possível encontrar a função de retirada!")
-    end
-end
-
 -- Função para equipar a espada
 local function equipSword(swordName)
     local character = player.Character or player.CharacterAdded:Wait()
@@ -219,24 +228,6 @@ local function equipSword(swordName)
     else
         print(swordName .. " não encontrada no inventário!")
     end
-end
-
--- Função para verificar a maestria
-local function verificarMaestria()
-    local playerGui = player:WaitForChild("PlayerGui")
-    local allTextLabels = playerGui:GetDescendants()
-
-    for _, object in pairs(allTextLabels) do
-        if object:IsA("TextLabel") then
-            if string.find(object.Text, "Mastery") or string.find(object.Text, "Maestria") then
-                local numeroMaestria = object.Text:match("%d+")
-                if numeroMaestria then
-                    return tonumber(numeroMaestria)
-                end
-            end
-        end
-    end
-    return 0
 end
 
 -- Função principal para equipar as espadas e verificar a maestria
@@ -274,64 +265,12 @@ local function equiparEspadas()
     end
 end
 
-print("Criando abas...")
+-- Criar abas
 local Tabs = {
     principal = Window:AddTab({ Title = "Principal", Icon = "" }),
     Teleporte = Window:AddTab({ Title = "Teleporte", Icon = "" }),
     Outros = Window:AddTab({ Title = "Outros", Icon = "" })
 }
-print("Abas criadas!")
-
--- Função para salvar dados em um arquivo JSON
-local function saveSettings(dados)
-    local nomeConta = player.Name
-    local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
-    
-    local sucesso, resultado = pcall(function()
-        local jsonData = game:GetService("HttpService"):JSONEncode(dados)
-        writefile(caminho, jsonData)
-    end)
-    
-    if sucesso then
-        print("Dados salvos com sucesso para " .. nomeConta)
-    else
-        print("Erro ao salvar dados: ", resultado)
-    end
-end
-
--- Função para carregar configurações do arquivo JSON
-local function loadSettings()
-    local nomeConta = player.Name
-    local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
-    
-    if isfile(caminho) then -- Verifica se o arquivo existe
-        local sucesso, conteudo = pcall(function()
-            return readfile(caminho)
-        end)
-        
-        if sucesso then
-            local sucessoDecode, settings = pcall(function()
-                return game:GetService("HttpService"):JSONDecode(conteudo)
-            end)
-            
-            if sucessoDecode and settings then
-                equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
-                _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
-                print("Configurações carregadas para " .. nomeConta, settings)
-            else
-                print("Erro ao decodificar configurações para " .. nomeConta)
-            end
-        else
-            print("Erro ao ler arquivo de configurações para " .. nomeConta)
-        end
-    else
-        print("Nenhuma configuração salva encontrada para " .. nomeConta)
-    end
-end
-
-
--- Carregar configurações ao iniciar o script
-loadSettings()
 
 -- Função de Toggle com salvamento automático
 Tabs.principal:AddToggle("Equipar Espadas", {
