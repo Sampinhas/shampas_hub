@@ -35,33 +35,50 @@ local _G = {
     AutoBuyLegendarySword = false
 }
 
--- Função para salvar as configurações
-local function saveSettings()
-    local settings = {
-        EquiparEspadasAtivo = equiparEspadasAtivo,
-        AutoBuyLegendarySword = _G.AutoBuyLegendarySword
-    }
-    -- Salva as configurações com o nick do jogador
-    SaveManager:Save(player.Name .. "_config", settings)
-    print("Configurações salvas para " .. player.Name)
+-- Função para salvar dados em um arquivo JSON
+local function salvarDados(dados)
+    local nomeConta = player.Name
+    local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
+    
+    local sucesso, resultado = pcall(function()
+        local jsonData = game:GetService("HttpService"):JSONEncode(dados)
+        writefile(caminho, jsonData)
+    end)
+    
+    if sucesso then
+        print("Dados salvos com sucesso para " .. nomeConta)
+    else
+        print("Erro ao salvar dados: ", resultado)
+    end
 end
 
+-- Função para carregar configurações do arquivo JSON
 local function loadSettings()
-    -- Tenta carregar as configurações
-    local success, settings = pcall(function()
-        return SaveManager:Load(player.Name .. "_config")
-    end)
-
-    -- Verifica se o carregamento foi bem-sucedido e se as configurações são uma tabela
-    if success and type(settings) == "table" then
-        equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
-        _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
-        print("Configurações carregadas para " .. player.Name)
+    local nomeConta = player.Name
+    local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
+    
+    if isfile(caminho) then -- Verifica se o arquivo existe
+        local sucesso, conteudo = pcall(function()
+            return readfile(caminho)
+        end)
+        
+        if sucesso then
+            local sucessoDecode, settings = pcall(function()
+                return game:GetService("HttpService"):JSONDecode(conteudo)
+            end)
+            
+            if sucessoDecode and settings then
+                equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
+                _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
+                print("Configurações carregadas para " .. nomeConta, settings)
+            else
+                print("Erro ao decodificar configurações para " .. nomeConta)
+            end
+        else
+            print("Erro ao ler arquivo de configurações para " .. nomeConta)
+        end
     else
-        -- Se houver erro ou as configurações forem inválidas, usa valores padrão
-        print("Erro ao carregar configurações para " .. player.Name .. ". Usando padrões.")
-        equiparEspadasAtivo = false
-        _G.AutoBuyLegendarySword = false
+        print("Nenhuma configuração salva encontrada para " .. nomeConta)
     end
 end
 
