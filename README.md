@@ -322,22 +322,8 @@ local function loadSettings()
     end
 end
 
-
--- Função de Toggle sem salvar configurações
-Tabs.principal:AddToggle("Auto Farm Bone", {
-    Title = "Auto Farm Bone",
-    Description = "Liga/desliga o AutoFarm de ossos no Sea 3",
-    Default = false, -- Inicializa sem depender de um valor carregado
-    Callback = function(Value)
-        Configs.Farming.Sea3.AutoFarmBone = Value  -- A variável é alterada diretamente
-        if Value then
-            print("AutoFarm Bone ativado!")
-            AutoFarmBone()  -- Inicia o loop de AutoFarm
-        else
-            print("AutoFarm Bone desativado!")
-        end
-    end
-})
+-- Carregar configurações ao iniciar o script
+loadSettings()
 
 -- Função de Toggle com salvamento automático
 Tabs.principal:AddToggle("Equipar Espadas", {
@@ -412,9 +398,6 @@ Tabs.Outros:AddButton({
         CheckQuest()
     end
 })
-
--- Carregar configurações ao iniciar o script
-loadSettings()
 
 -- Inicializar SaveManager e InterfaceManager
 SaveManager:SetLibrary(Fluent)
