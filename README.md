@@ -71,14 +71,24 @@ local function carregarDados()
     local nomeConta  = player.Name
     local caminho = "ShampasHub/Temp/" .. nomeConta .. "_data_config.json"
     
+    -- Verifica se o arquivo existe
     if isfile(caminho) then
         local jsonDados = readfile(caminho)
         local dados = game:GetService("HttpService"):JSONDecode(jsonDados)
         print("Dados carregados com sucesso de " .. caminho)
         return dados
     else
-        print("Nenhum dado salvo encontrado.")
-        return {}
+        print("Nenhum dado salvo encontrado. Criando base de dados padrão...")
+        
+        -- Caso o arquivo não exista, cria uma base de dados padrão
+        local dadosPadrao = {
+            EquiparEspadasAtivo = false,
+            AutoBuyLegendarySword = false
+        }
+        
+        -- Salva os dados padrão
+        salvarDados(dadosPadrao)
+        return dadosPadrao
     end
 end
 
