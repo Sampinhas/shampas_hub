@@ -82,10 +82,20 @@ local function carregarDados()
     end
 end
 
-local dados = carregarDados()  -- Chama a função para carregar os dados
-    
-equiparEspadasAtivo = dados.EquiparEspadasAtivo or false  -- Define valores padrões, caso os dados estejam vazios
-_G.AutoBuyLegendarySword = dados.AutoBuyLegendarySword or false
+local dados = carregarDados()
+
+-- Verifica se a chave EquiparEspadasAtivo existe
+if dados.EquiparEspadasAtivo == nil then
+    dados.EquiparEspadasAtivo = false  -- Define o valor padrão se não existir
+end
+equiparEspadasAtivo = dados.EquiparEspadasAtivo
+
+-- Verifica se a chave EquiparEspadasAtivo existe
+if dados.AutoBuyLegendarySword == nil then
+    dados.AutoBuyLegendarySword = false  -- Define o valor padrão se não existir
+end
+_G.AutoBuyLegendarySword = dados.AutoBuyLegendarySword
+
 
 -- Criar a janela principal
 local Window = Fluent:CreateWindow({
@@ -237,31 +247,7 @@ function AutoHaki()
     end
 end
 
-local HttpService = game:GetService("HttpService")
-local player = game.Players.LocalPlayer
 local replicatedStorage = game:GetService("ReplicatedStorage")
-
--- URL do Webhook do Discord (substitua pelo seu Webhook)
-local webhookURL = "https://discord.com/api/webhooks/1342766197443399711/Tt9APuGmeR9pHkRpdwA2pTvTJ9Z6_0k7iTPj-QIdST5Q-2VO-vowgxvzso1FmgalsHtt"
-
--- Função para enviar mensagem para o Discord
-local function enviarParaDiscord(mensagem)
-    local data = { ["content"] = mensagem }
-    local jsonData = HttpService:JSONEncode(data)
-    local requestFunc = http_request or request or syn.request
-
-    if requestFunc then
-        requestFunc({
-            Url = webhookURL,
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = jsonData
-        })
-        print("Mensagem enviada para o Discord!")
-    else
-        print("Seu executor não suporta requisições HTTP.")
-    end
-end
 
 -- Função para pegar o dinheiro (Beli)
 local function pegarBeli()
@@ -289,7 +275,6 @@ local function viajarParaSecondSea()
     if money >= 2000000 then
         print("💰 Você tem " .. money .. " Beli! Viajando para Second Sea...")
         replicatedStorage.Remotes.CommF_:InvokeServer("TravelDressrosa")
-        enviarParaDiscord("🛳️ **" .. player.Name .. "** viajou para o Second Sea com **" .. money .. " Beli**!")
     else
         print("❌ Você tem " .. money .. " Beli. Precisa de pelo menos 2.000.000.")
     end
@@ -378,8 +363,6 @@ local function equiparEspadas()
         print("Maestria de " .. espada .. " atingiu 300. Equipando próxima espada.")
     end
 
-    -- Enviar mensagem para o Discord quando todas forem concluídas
-    enviarParaDiscord("✅ **" .. player.Name .. "** atingiu 300 de maestria em todas as espadas!")
     print("Todas as espadas equipadas e maestrias atingidas!")
 
     -- Agora verifica o dinheiro para viajar
@@ -425,7 +408,6 @@ local function transportarParaCoordenadas()
         local distancia = (posicaoAtual - destinoFinal).Magnitude
 
         if distancia <= 5 then -- Se estiver próximo das coordenadas (tolerância de 5 unidades)
-            enviarParaDiscord("✅ **" .. player.Name .. "** chegou às coordenadas: " .. tostring(destinoFinal))
         else
             print("O jogador não chegou às coordenadas corretas.")
         end
@@ -442,7 +424,6 @@ local function verificarEquiparEspadas()
         if equiparEspadasAtivo then
             print("Equipar espadas ativado! Iniciando processo...")
             equiparEspadas()
-            equiparEspadasAtivo = false -- Desativa após a execução (opcional)
         end
     end
 end
