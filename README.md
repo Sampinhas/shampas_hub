@@ -13,6 +13,26 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
+
+local function esperarObjeto(pasta, nome)
+    while not pasta:FindFirstChild(nome) do
+        task.wait()
+    end
+    return pasta:FindFirstChild(nome)
+end
+
+local Effect = esperarObjeto(ReplicatedStorage, "Effect")
+local Container = esperarObjeto(Effect, "Container")
+local Anchor = esperarObjeto(Container, "Anchor")
+
+-- Verifica se Anchor tem a propriedade correta antes de acessá-la
+if Anchor and Anchor:IsA("BasePart") then
+    print("Z Position:", Anchor.Position.Z) -- Certifique-se de acessar a propriedade correta
+else
+    warn("Anchor não encontrado ou não é uma peça válida!")
+end
+
+
 -- Definir a pasta de configuração para ShampasHub
 SaveManager:SetFolder("ShampasHub")
 
