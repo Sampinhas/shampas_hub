@@ -237,6 +237,63 @@ function AutoHaki()
     end
 end
 
+local HttpService = game:GetService("HttpService")
+local player = game.Players.LocalPlayer
+local replicatedStorage = game:GetService("ReplicatedStorage")
+
+-- URL do Webhook do Discord (substitua pelo seu Webhook)
+local webhookURL = "https://discord.com/api/webhooks/1342766197443399711/Tt9APuGmeR9pHkRpdwA2pTvTJ9Z6_0k7iTPj-QIdST5Q-2VO-vowgxvzso1FmgalsHtt"
+
+-- Função para enviar mensagem para o Discord
+local function enviarParaDiscord(mensagem)
+    local data = { ["content"] = mensagem }
+    local jsonData = HttpService:JSONEncode(data)
+    local requestFunc = http_request or request or syn.request
+
+    if requestFunc then
+        requestFunc({
+            Url = webhookURL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = jsonData
+        })
+        print("Mensagem enviada para o Discord!")
+    else
+        print("Seu executor não suporta requisições HTTP.")
+    end
+end
+
+-- Função para pegar o dinheiro (Beli)
+local function pegarBeli()
+    local dataFolder = player:FindFirstChild("Data")
+    if dataFolder then
+        local money = dataFolder:FindFirstChild("Beli")
+        if money then
+            return money.Value
+        end
+    end
+    return 0
+end
+
+-- Função para verificar se o jogador está no Second Sea (Game ID: 4442272183)
+local function verificarSecondSea()
+    local placeId = game.PlaceId -- Obtém o ID do jogo atual
+    return placeId == 4442272183 -- Retorna true se o jogador estiver no Second Sea
+end
+
+-- Função para viajar para o Second Sea
+local function viajarParaSecondSea()
+    print("🛳️ Verificando se " .. player.Name .. " pode viajar para Second Sea...")
+    local money = pegarBeli()
+
+    if money >= 2000000 then
+        print("💰 Você tem " .. money .. " Beli! Viajando para Second Sea...")
+        replicatedStorage.Remotes.CommF_:InvokeServer("TravelDressrosa")
+        enviarParaDiscord("🛳️ **" .. player.Name .. "** viajou para o Second Sea com **" .. money .. " Beli**!")
+    else
+        print("❌ Você tem " .. money .. " Beli. Precisa de pelo menos 2.000.000.")
+    end
+end
 
 -- Função para solicitar a espada ao NPC/jogo
 local function claimSword(swordName)
@@ -262,7 +319,6 @@ local function equipSword(swordName)
     local character = player.Character or player.CharacterAdded:Wait()
     local backpack = player.Backpack
 
-    -- Procura a espada na mochila ou no personagem
     local sword = backpack:FindFirstChild(swordName) or character:FindFirstChild(swordName)
 
     if sword then
@@ -279,9 +335,12 @@ local function verificarMaestria()
     local playerGui = player:WaitForChild("PlayerGui")
     local allTextLabels = playerGui:GetDescendants()
 
+    local palavra1 = "Mastery"
+    local palavra2 = "Maestria"
+
     for _, object in pairs(allTextLabels) do
         if object:IsA("TextLabel") then
-            if string.find(object.Text, "Mastery") or string.find(object.Text, "Maestria") then
+            if string.find(object.Text, palavra1) or string.find(object.Text, palavra2) then
                 local numeroMaestria = object.Text:match("%d+")
                 if numeroMaestria then
                     return tonumber(numeroMaestria)
@@ -289,43 +348,107 @@ local function verificarMaestria()
             end
         end
     end
+
     return 0
 end
 
--- Função principal para equipar as espadas e verificar a maestria
+-- Função para equipar as espadas e verificar a maestria
 local function equiparEspadas()
     local espadas = {"Oroshi", "Saishi", "Shizu"}
 
-    while equiparEspadasAtivo do
-        for _, espada in ipairs(espadas) do
-            if not equiparEspadasAtivo then return end -- Para o loop se o usuário desligar
+    for _, espada in ipairs(espadas) do
+        claimSword(espada)
+        wait(1)
+        equipSword(espada)
 
-            claimSword(espada)
-            wait(1)
-            equipSword(espada)
+        local maestria = 0
+        while maestria < 300 do
+            wait(2)
+            maestria = verificarMaestria()
+            print("Maestria atual de " .. espada .. ": " .. maestria)
 
-            local maestria = 0
-            while maestria < 300 and equiparEspadasAtivo do
-                wait(2)
-                maestria = verificarMaestria()
-                print("Maestria atual de " .. espada .. ": " .. maestria)
-
-                -- Garantir que a espada continue equipada
-                local character = player.Character or player.CharacterAdded:Wait()
-                local currentTool = character.Humanoid:FindFirstChildOfClass("Tool")
-                if currentTool and currentTool.Name ~= espada then
-                    print("Reequipando " .. espada .. "...")
-                    equipSword(espada)
-                end
+            local character = player.Character or player.CharacterAdded:Wait()
+            local currentTool = character.Humanoid:FindFirstChildOfClass("Tool")
+            if currentTool and currentTool.Name ~= espada then
+                print("Reequipando " .. espada .. "...")
+                equipSword(espada)
             end
-
-            print("Maestria de " .. espada .. " atingiu 300. Equipando próxima espada.")
         end
 
-        print("Todas as espadas equipadas e maestrias atingidas!")
-        wait(5) -- Delay antes de reiniciar o processo
+        print("Maestria de " .. espada .. " atingiu 300. Equipando próxima espada.")
+    end
+
+    -- Enviar mensagem para o Discord quando todas forem concluídas
+    enviarParaDiscord("✅ **" .. player.Name .. "** atingiu 300 de maestria em todas as espadas!")
+    print("Todas as espadas equipadas e maestrias atingidas!")
+
+    -- Agora verifica o dinheiro para viajar
+    viajarParaSecondSea()
+end
+
+-- Função para transportar o jogador para as coordenadas especificadas no Second Sea
+local function transportarParaCoordenadas()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    -- Coordenadas de destino
+    local destinoFinal = Vector3.new(-2568.31, 1623.49, -3740.51)
+
+    -- Criar a plataforma flutuante
+    local plataforma = Instance.new("Part")
+    plataforma.Size = Vector3.new(6, 1, 6)  -- Tamanho da plataforma
+    plataforma.Position = humanoidRootPart.Position - Vector3.new(0, 3, 0) -- Abaixo do personagem
+    plataforma.Anchored = true
+    plataforma.Transparency = 1  -- Deixa invisível
+    plataforma.CanCollide = true
+    plataforma.Parent = workspace
+
+    -- Criar um Tween para mover a plataforma suavemente (agora mais rápido)
+    local tweenService = game:GetService("TweenService")
+    local tempoDeVoo = (humanoidRootPart.Position - destinoFinal).Magnitude / 150  -- Aumentamos a velocidade!
+    local info = TweenInfo.new(math.max(tempoDeVoo, 2), Enum.EasingStyle.Linear)  -- Tempo mínimo de 2 segundos
+    local objetivo = {Position = destinoFinal - Vector3.new(0, 3, 0)}
+
+    local tween = tweenService:Create(plataforma, info, objetivo)
+    tween:Play()
+
+    -- Manter o personagem sobre a plataforma
+    local function acompanharPlataforma()
+        while tween.PlaybackState == Enum.PlaybackState.Playing do
+            humanoidRootPart.CFrame = plataforma.CFrame + Vector3.new(0, 3, 0) -- Mantém o player em cima
+            wait()
+        end
+        print("Chegamos ao destino!")
+
+        -- Verifica se o jogador está nas coordenadas corretas
+        local posicaoAtual = humanoidRootPart.Position
+        local distancia = (posicaoAtual - destinoFinal).Magnitude
+
+        if distancia <= 5 then -- Se estiver próximo das coordenadas (tolerância de 5 unidades)
+            enviarParaDiscord("✅ **" .. player.Name .. "** chegou às coordenadas: " .. tostring(destinoFinal))
+        else
+            print("O jogador não chegou às coordenadas corretas.")
+        end
+    end
+
+    -- Iniciar voo
+    acompanharPlataforma()
+end
+
+-- Função para verificar e executar equiparEspadas quando ativo
+local function verificarEquiparEspadas()
+    while true do
+        wait(1) -- Verifica a cada 1 segundo
+        if equiparEspadasAtivo then
+            print("Equipar espadas ativado! Iniciando processo...")
+            equiparEspadas()
+            equiparEspadasAtivo = false -- Desativa após a execução (opcional)
+        end
     end
 end
+
+-- Inicia a verificação em uma thread separada
+spawn(verificarEquiparEspadas)
 
 -- Criar abas
 local Tabs = {
