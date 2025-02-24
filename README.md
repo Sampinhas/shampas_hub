@@ -16,48 +16,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
--- Variáveis globais
--- Obtém o mundo atual do jogo
-local currentSea = 1 -- Definição padrão para evitar erros
-
-if game.PlaceId == 2753915549 then
-    currentSea = 1  -- First Sea
-elseif game.PlaceId == 4442272183 then
-    currentSea = 2  -- Second Sea
-elseif game.PlaceId == 7449423635 then
-    currentSea = 3  -- Third Sea
-else
-    LocalPlayer:Kick("Jogo não suportado. Por favor, aguarde...")
-    return
-end
-
--- Verifica em qual Sea a conta do jogador deve estar
-local function getAccountSea()
-    -- Verifica se o jogador pode ir para o Second Sea
-    local canGoToSecondSea = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa") == 1
-
-    -- Verifica se o jogador pode ir para o Third Sea
-    local canGoToThirdSea = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou") == 2
-
-    if canGoToThirdSea then
-        return 3
-    elseif canGoToSecondSea then
-        return 2
-    else
-        return 1
-    end
-end
-
--- Obtém o Sea da conta
-local accountSea = getAccountSea()
-
--- Se o jogador não estiver no Sea correto, ele é expulso
-if currentSea ~= accountSea then
-    LocalPlayer:Kick("Você está no Sea errado! A conta pertence ao Sea " .. accountSea .. ".")
-    return
-end
-
-
 Fluent:Notify({
     Title = "Shampas HUB v1.0",
     Content = "Carregando em alguns segundos...",
