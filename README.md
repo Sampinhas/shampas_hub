@@ -331,6 +331,7 @@ Tabs.principal:AddToggle("Auto Farm Bone", {
     end
 })
 
+-- Função de Toggle com salvamento automático
 Tabs.principal:AddToggle("Equipar Espadas", {
     Title = "Equipar Espadas",
     Description = "Liga/desliga o equipar espadas",
@@ -339,10 +340,11 @@ Tabs.principal:AddToggle("Equipar Espadas", {
         equiparEspadasAtivo = Value
         if Value then
             print("Equipar espadas ativado!")
-            task.spawn(equiparEspadas) -- Inicia o loop sem travar o script
+            task.spawn(equiparEspadas)
         else
             print("Equipar espadas desativado!")
         end
+        saveSettings() -- Salva as configurações ao alterar o toggle
     end
 })
 
@@ -358,8 +360,12 @@ Tabs.principal:AddToggle("Auto Buy Legendary Sword", {
         else
             print("Auto Buy Legendary Sword desativado!")
         end
+        saveSettings() -- Salva as configurações ao alterar o toggle
     end
 })
+
+-- Carregar configurações ao iniciar o script
+loadSettings()
 
 -- Outros botões e funções
 Tabs.Teleporte:AddButton({
@@ -409,8 +415,7 @@ InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
+InterfaceManager:SetFolder("ShampasHub")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Outros)
 SaveManager:BuildConfigSection(Tabs.Outros)
