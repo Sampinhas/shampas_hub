@@ -7,8 +7,6 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
-SaveManager.Folder = "ShampasHub"
-
 local P = game:GetService("Players");
 local selff = P.LocalPlayer;
 local PSG = selff:WaitForChild("PlayerGui");
@@ -416,6 +414,7 @@ SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
 InterfaceManager:SetFolder("ShampasHub")
+SaveManager:SetFolder("ShampasHub/specific-game")
 
 InterfaceManager:BuildInterfaceSection(Tabs.Outros)
 SaveManager:BuildConfigSection(Tabs.Outros)
