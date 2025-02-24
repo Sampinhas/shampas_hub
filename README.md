@@ -1,6 +1,6 @@
 -- Verifica se o jogo está carregado
 if not game:IsLoaded() then
-    game.Loaded:Wait() -- Espera o jogo carregar
+    game.Loaded:Wait()
 end
 
 -- Carregar a Fluent UI e os addons
@@ -26,27 +26,28 @@ end
 -- Escolhe automaticamente os Piratas
 chooseTeam("Pirates")
 
+-- Variáveis globais
+local equiparEspadasAtivo = false
+local _G = {
+    AutoBuyLegendarySword = false
+}
+
 -- Função para salvar as configurações
 local function saveSettings()
     local settings = {
         EquiparEspadasAtivo = equiparEspadasAtivo,
         AutoBuyLegendarySword = _G.AutoBuyLegendarySword
     }
-    -- Salva as configurações com o nick do jogador
-    SaveManager:Save(player.Name .. "_config", settings)
+    SaveManager:Save(player.Name .. "_config", settings) -- Salva as configurações com o nick do jogador
     print("Configurações salvas para " .. player.Name)
 end
 
 -- Função para carregar as configurações
 local function loadSettings()
-    -- Carrega as configurações com o nick do jogador
-    local settings = SaveManager:Load(player.Name .. "_config")
+    local settings = SaveManager:Load(player.Name .. "_config") -- Carrega as configurações com o nick do jogador
     if settings then
         equiparEspadasAtivo = settings.EquiparEspadasAtivo
         _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword
-        -- Atualiza a interface com os valores carregados
-        Tabs.principal:SetToggle("Equipar Espadas", equiparEspadasAtivo)
-        Tabs.principal:SetToggle("Auto Buy Legendary Sword", _G.AutoBuyLegendarySword)
         print("Configurações carregadas para " .. player.Name)
     else
         print("Nenhuma configuração salva encontrada para " .. player.Name)
@@ -67,7 +68,6 @@ local Window = Fluent:CreateWindow({
 -- Variáveis globais
 local World1, World2, World3
 local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
-local equiparEspadasAtivo = false
 
 -- Verifica o mundo atual
 if game.PlaceId == 2753915549 then
