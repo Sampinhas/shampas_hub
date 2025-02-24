@@ -47,15 +47,18 @@ local function saveSettings()
 end
 
 local function loadSettings()
+    -- Tenta carregar as configurações
     local success, settings = pcall(function()
         return SaveManager:Load(player.Name .. "_config")
     end)
 
-    if success and settings then
+    -- Verifica se o carregamento foi bem-sucedido e se as configurações são uma tabela
+    if success and type(settings) == "table" then
         equiparEspadasAtivo = settings.EquiparEspadasAtivo or false
         _G.AutoBuyLegendarySword = settings.AutoBuyLegendarySword or false
         print("Configurações carregadas para " .. player.Name)
     else
+        -- Se houver erro ou as configurações forem inválidas, usa valores padrão
         print("Erro ao carregar configurações para " .. player.Name .. ". Usando padrões.")
         equiparEspadasAtivo = false
         _G.AutoBuyLegendarySword = false
