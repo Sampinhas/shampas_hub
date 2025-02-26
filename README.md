@@ -20,6 +20,7 @@ SaveManager:SetFolder("ShampasHub")
 
 -- Função para escolher o lado automaticamente
 local function chooseTeam(team)
+    wait(10)
     if team == "Pirates" or team == "Marines" then
         ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", team) -- Escolhe o time
         print("Você escolheu automaticamente o lado dos " .. team .. "!")
