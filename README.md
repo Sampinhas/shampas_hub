@@ -1,4 +1,4 @@
-wait(10)
+task.wait(10)
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
@@ -13,14 +13,11 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
-wait(3)
-
 -- Definir a pasta de configuração para ShampasHub
 SaveManager:SetFolder("ShampasHub")
 
 -- Função para escolher o lado automaticamente
 local function chooseTeam(team)
-    wait(10)
     if team == "Pirates" or team == "Marines" then
         ReplicatedStorage.Remotes.CommF_:InvokeServer("SetTeam", team) -- Escolhe o time
         print("Você escolheu automaticamente o lado dos " .. team .. "!")
@@ -31,8 +28,6 @@ end
 
 -- Escolhe automaticamente os Piratas
 chooseTeam("Pirates")
-
-wait(3)
 
 -- Variáveis globais
 local equiparEspadasAtivo = false
