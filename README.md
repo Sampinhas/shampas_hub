@@ -1,4 +1,4 @@
--- Verifica se o jogo está carregado
+wait(10)
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
