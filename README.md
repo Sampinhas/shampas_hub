@@ -734,6 +734,11 @@ Tabs.principal:AddToggle("Auto Bones", {
     Callback = function(Value)
         _G.Auto_Bone = Value
         _G.AutoClick = Value
+        if Value then
+            print("Auto bones ativo")
+        else
+            print("Auto bones desativado")
+        end
         StopTween(_G.Auto_Bone)
         local dados = {
             EquiparEspadasAtivo = equiparEspadasAtivo,
