@@ -756,18 +756,11 @@ Tabs.principal:AddToggle("Auto Bones", {
     Default = _G.Auto_Bone or false,
     Callback = function(Value)
         _G.Auto_Bone = Value
-        _G.AutoClick = Value
-        if Value then
-            print("Auto bones ativo")
-        else
-            print("Auto bones desativado")
-        end
         StopTween(_G.Auto_Bone)
         local dados = {
             EquiparEspadasAtivo = equiparEspadasAtivo,
             AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
-            Auto_Bone = _G.Auto_Bone,
-            AutoClick = _G.AutoClick
+            Auto_Bone = _G.Auto_Bone
         }
         
         salvarDados(dados)
