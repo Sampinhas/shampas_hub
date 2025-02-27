@@ -727,30 +727,6 @@ local Tabs = {
     Outros = Window:AddTab({ Title = "Outros", Icon = "" })
 }
 
-Tabs.principal:AddToggle("Auto Bones", {
-    Title = "Auto Bones",
-    Description = "Ele farma ossos muahmmuah",
-    Default = _G.Auto_Bone,
-    Callback = function(Value)
-        _G.Auto_Bone = Value
-        _G.AutoClick = Value
-        if Value then
-            print("Auto bones ativo")
-        else
-            print("Auto bones desativado")
-        end
-        StopTween(_G.Auto_Bone)
-        local dados = {
-            EquiparEspadasAtivo = equiparEspadasAtivo,
-            AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
-            Auto_Bone = _G.Auto_Bone,
-            AutoClick = _G.AutoClick
-        }
-        
-        salvarDados(dados)
-    end
-})
-
 -- Função de Toggle com salvamento automático
 Tabs.principal:AddToggle("Equipar Espadas", {
     Title = "Equipar Espadas",
@@ -764,6 +740,29 @@ Tabs.principal:AddToggle("Equipar Espadas", {
         else
             print("Equipar espadas desativado!")
         end
+        local dados = {
+            EquiparEspadasAtivo = equiparEspadasAtivo,
+            AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
+            Auto_Bone = _G.Auto_Bone,
+            AutoClick = _G.AutoClick
+        }
+        
+        salvarDados(dados)
+    end
+})
+Tabs.principal:AddToggle("Auto Bones", {
+    Title = "Auto Bones",
+    Description = "Ele farma ossos muahmmuah",
+    Default = _G.Auto_Bone or false,
+    Callback = function(Value)
+        _G.Auto_Bone = Value
+        _G.AutoClick = Value
+        if Value then
+            print("Auto bones ativo")
+        else
+            print("Auto bones desativado")
+        end
+        StopTween(_G.Auto_Bone)
         local dados = {
             EquiparEspadasAtivo = equiparEspadasAtivo,
             AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
