@@ -727,12 +727,6 @@ local Tabs = {
     Outros = Window:AddTab({ Title = "Outros", Icon = "" })
 }
 
-local dados = {
-    EquiparEspadasAtivo = equiparEspadasAtivo,
-    AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
-    Auto_Bone = _G.Auto_Bone
-}
-
 Tabs.principal:AddToggle("Auto Bones", {
     Title = "Auto Bones",
     Description = "Ele farma ossos muahmmuah",
