@@ -34,7 +34,8 @@ local equiparEspadasAtivo = false
 _G = {
     AutoBuyLegendarySword = false,
     Auto_Bone = false,
-    BringMode = 375
+    BringMode = 375,
+    AutoClick = false
 }
 
 -- Função para salvar dados em um arquivo JSON
@@ -88,6 +89,12 @@ if dados.Auto_Bone == nil then
     dados.Auto_Bone = false  -- Define o valor padrão se não existir
 end
 Auto_Bone = dados.Auto_Bone
+
+-- Verifica se a chave EquiparEspadasAtivo existe
+if dados.AutoClick == nil then
+    dados.AutoClick = false  -- Define o valor padrão se não existir
+end
+AutoClick = dados.AutoClick
 
 -- Verifica se a chave EquiparEspadasAtivo existe
 if dados.AutoBuyLegendarySword == nil then
@@ -578,7 +585,6 @@ end)
 spawn(function()
     while task.wait() do
         pcall(function()
-            CheckQuest()
             for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                 if _G.AutoFarm and StartMagnet and v.Name == Mon and (Mon == "Factory Staff" or Mon == "Monkey" or Mon == "Dragon Crew Warrior" or Mon == "Dragon Crew Archer") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 and (v.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 220 then
                     v.HumanoidRootPart.Size = Vector3.new(50,50,50)
@@ -733,13 +739,15 @@ Tabs.principal:AddToggle("Auto Bones", {
     Default = _G.Auto_Bone,
     Callback = function(Value)
         _G.Auto_Bone = Value
-        _G.
+        _G.AutoClick = Value
         StopTween(_G.Auto_Bone)
         local dados = {
             EquiparEspadasAtivo = equiparEspadasAtivo,
             AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
-            Auto_Bone = _G.Auto_Bone
+            Auto_Bone = _G.Auto_Bone,
+            AutoClick = _G.AutoClick
         }
+        
         salvarDados(dados)
     end
 })
@@ -760,7 +768,8 @@ Tabs.principal:AddToggle("Equipar Espadas", {
         local dados = {
             EquiparEspadasAtivo = equiparEspadasAtivo,
             AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
-            Auto_Bone = _G.Auto_Bone
+            Auto_Bone = _G.Auto_Bone,
+            AutoClick = _G.AutoClick
         }
         
         salvarDados(dados)
@@ -781,8 +790,11 @@ Tabs.principal:AddToggle("Auto Buy Legendary Sword", {
         end
         local dados = {
             EquiparEspadasAtivo = equiparEspadasAtivo,
-            AutoBuyLegendarySword = _G.AutoBuyLegendarySword
+            AutoBuyLegendarySword = _G.AutoBuyLegendarySword,
+            Auto_Bone = _G.Auto_Bone,
+            AutoClick = _G.AutoClick
         }
+        
         salvarDados(dados)
     end
 })
