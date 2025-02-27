@@ -251,10 +251,28 @@ local function pegarBeli()
     return 0
 end
 
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
 -- Função para verificar se o jogador está no Second Sea (Game ID: 4442272183)
 local function verificarSecondSea()
     local placeId = game.PlaceId -- Obtém o ID do jogo atual
     return placeId == 4442272183 -- Retorna true se o jogador estiver no Second Sea
+end
+
+-- Função para ativar noclip
+local function ativarNoClip()
+    for _, part in pairs(character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+end
+
+-- Função para mover o jogador até o NPC
+local function moverParaNPC(posicaoNPC)
+    ativarNoClip()
+    humanoidRootPart.CFrame = CFrame.new(posicaoNPC)
 end
 
 -- Função para viajar para o Second Sea
@@ -263,7 +281,15 @@ local function viajarParaSecondSea()
     local money = pegarBeli()
 
     if money >= 2000000 then
-        print("💰 Você tem " .. money .. " Beli! Viajando para Second Sea...")
+        print("💰 Você tem " .. money .. " Beli! Indo até o NPC...")
+
+        -- Defina a posição do NPC aqui
+        local posicaoNPC = Vector3.new(1234, 100, 5678) -- Substitua pela posição real do NPC
+
+        moverParaNPC(posicaoNPC)
+        wait(1) -- Pequena espera para garantir que chegou ao NPC
+
+        print("🚢 Chegou ao NPC! Viajando para Second Sea...")
         replicatedStorage.Remotes.CommF_:InvokeServer("TravelDressrosa")
     else
         print("❌ Você tem " .. money .. " Beli. Precisa de pelo menos 2.000.000.")
